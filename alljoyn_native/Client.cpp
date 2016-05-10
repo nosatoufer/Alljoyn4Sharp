@@ -42,6 +42,11 @@ SessionId* Client::getSessionId()
 	return &mSessionId;
 }
 
+bool Client::isJoined()
+{
+	return mJoinComplete;
+}
+
 void Client::RegisterBusListener()
 {
 	mConnectionListener = new ConnectionListener(mPrefix, mBus, mPort,  this);
@@ -99,6 +104,7 @@ Client::Client(std::string prefix, std::string name) : AllJoynBase(), mName(name
 	mAdvertisedName = prefix + name;
 	mBusObject = NULL;
 	mPort = 27;
+	mJoinComplete = false;
 
 }
 

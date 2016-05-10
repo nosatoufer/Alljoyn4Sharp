@@ -134,6 +134,11 @@ SessionId* Server::getSessionId()
 	return &mSessionId;
 }
 
+bool Server::isJoined()
+{
+	return mJoined;
+}
+
 
 void Server::RegisterBusListener() {
 	//if (mConnectionListener)

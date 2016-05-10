@@ -339,13 +339,13 @@ namespace alljoyn_net
         /// <param name="values">The values used to create the messages</param>
         /// <param name="sig">The Alljoyn type of the values</param>
         /// <returns></returns>
-        public static IntPtr[] CreateMessages(object[] values, ParameterInfo[] sig)
+        public static IntPtr[] CreateMessages(object[] values)
         {
-            IntPtr[] msgs = new IntPtr[sig.Length];
+            IntPtr[] msgs = new IntPtr[values.Length];
             int i = 0;
-            foreach (ParameterInfo t in sig)
+            foreach (Object o in values)
             {
-                switch (t.ParameterType.Name)
+                switch (o.GetType().Name)
                 {
                     case "Int32":
                         msgs[i] = CreateMsgArgInt((int)values[i]);

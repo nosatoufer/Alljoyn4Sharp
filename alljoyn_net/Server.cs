@@ -102,7 +102,7 @@ namespace alljoyn_net
         public void test()
         {
             IntPtr[] msgs = new IntPtr[0];
- 
+
             //msgs[0] = NativeHelper.CreateReply(t.Name, vars);
             NativeHelper.Server_SendSignal(_nativeServer.Value, "Test", null, 0);
 
@@ -113,6 +113,17 @@ namespace alljoyn_net
             msgs[0] = NativeHelper.CreateReply(t.Name, vars);
             NativeHelper.Server_SendSignal(_nativeServer.Value, "Chat", msgs, msgs.Length);
 
+        }
+        public void SendEvent(string name, Object[] vars)
+        {
+            Console.WriteLine("SendEvent {0}", name);
+            Type t = typeof(T);
+            EventInfo eInfo = t.GetEvent(name);
+            if (eInfo != null)
+            {
+                IntPtr[] msgs = NativeHelper.CreateMessages(vars);
+                NativeHelper.Server_SendSignal(_nativeServer.Value, name, msgs, msgs.Length);
+            }
         }
 
         private int ReceiveString(string str)
@@ -227,7 +238,7 @@ namespace alljoyn_net
             NativeHelper.Server_Initialize(_nativeServer.Value);
             InitializeHandlers();
             NativeHelper.Server_Start(_nativeServer.Value);
-            
+
         }
 
         /// <summary>

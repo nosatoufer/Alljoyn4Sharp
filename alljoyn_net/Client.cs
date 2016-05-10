@@ -52,7 +52,6 @@ namespace alljoyn_net
             Console.WriteLine("{0} called", memberName);
 
             Type type = typeof(T);
-            EventInfo eInfo = type.GetEvent(memberName);
             string signature = NativeHelper.MessageSignature(msg);
             Object[] values = new Object[signature.Length];
             NativeHelper.extractValues(values, msg, signature);
@@ -83,28 +82,39 @@ namespace alljoyn_net
         /// </summary>
         /// <param name="name">The name of the method to call</param>
         /// <param name="vars">All the parameters that will be sent</param>
-        public void CallMethod(string name, object[] vars)
+        public Object CallMethod(string name, object[] vars)
         {
+            Console.WriteLine("Method name = {0}", name);
             Type type = typeof(T);
             MethodInfo mInfo = type.GetMethod(name);
             if (mInfo != null)
             {
                 ParameterInfo[] sig = mInfo.GetParameters();
-                if (sig.Length != vars.Length)
-                    throw new ApplicationException("Wrong number of arguments");
+                for (int i = 0; i < vars.Length; i++)
+                {
+                    if(sig[i].ParameterType != vars[i].GetType())
+                    {
+                        Console.WriteLine("sig = {0} ?= vars = {1}", sig[i].ParameterType.Name, vars[i].GetType().Name);
+                        string s = "Expected : " + sig[i].ParameterType.Name + " got : " + vars[i].GetType().Name;
+                        throw new ApplicationException(s);
+                    }
+                }
 
-                IntPtr[] msgs = NativeHelper.CreateMessages(vars, sig);
+                IntPtr[] msgs = NativeHelper.CreateMessages(vars);
                 IntPtr reply = NativeHelper.Client_CallMethod(_nativeClient.Value, name, msgs, msgs.Length);
                 if (reply != IntPtr.Zero)
                 {
                     Object replyValue = NativeHelper.extractValue(reply, mInfo.ReturnType);
                     Console.WriteLine("Value received : {0}", replyValue);
+                    return replyValue;
                 }
                 else
                 {
-                    // TODO : MANAGE NULL REPLY ( ERROR )
+                    Console.WriteLine("Nothing was returned");
                 }
+                
             }
+            return null;
 
         }
 

@@ -31,6 +31,7 @@ public:
 	void setSessionId(SessionId id);
 	void setJoined(bool joined);
 	SessionId* getSessionId();
+	bool isJoined();
 
 protected:
 	void RegisterBusListener();

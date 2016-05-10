@@ -80,7 +80,12 @@ namespace AllJoyn4Sharp_console
                     obj.OnChat(str);
                 }
                 str = Console.ReadLine();
-                s.test();
+                Object[] vars = new Object[0];
+                s.SendEvent("Test", vars);
+                vars = new Object[1];
+                vars[0] = "Chat testing";
+                s.SendEvent("Chat", vars);
+
             }
             s.Stop();
         }

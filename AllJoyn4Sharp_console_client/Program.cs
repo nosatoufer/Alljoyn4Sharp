@@ -46,10 +46,6 @@ namespace AllJoyn4Sharp_console_client
         }
 
         [RemoteMethod]
-        public string brol() { return "You called Brol!"; }
-        [RemoteMethod]
-        public double gettt() { return 1.2; }
-        [RemoteMethod]
         public string cat(string s1, string s2)
         {
             string ret = s1 + s2;
@@ -88,19 +84,20 @@ namespace AllJoyn4Sharp_console_client
             nObject.Chat += nObject.OnChat;
             c.Connect();
             Object[] testE = new Object[1];
-            nObject.FireEvent("Chat", testE);
             //IObject obj = c.GetProxy();
             Object[] vars = new Object[2];
             vars[0] = 10;
             vars[1] = 12;
 
-            Object[] vars2 = new Object[0];
+            Object[] vars2 = new Object[2];
+            vars2[0] = "Test";
+            vars2[1] = " passed.";
 
             try
             {
                 c.CallMethod("mySum", vars);
                 Console.ReadLine();
-                c.CallMethod("brol", vars2);
+                c.CallMethod("cat", vars2);
             }
             catch (ApplicationException aException)
             {
