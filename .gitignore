@@ -1,0 +1,11 @@
+.vs/
+**/Debug
+ipch/
+*.sdf
+*.opendb
+*.obj
+*.tlog
+*.log
+/Alljoyn4Sharp.VC.*
+/Alljoyn4Sharp_Client.VC.*
+/Alljoyn4Sharp.v12.suo
