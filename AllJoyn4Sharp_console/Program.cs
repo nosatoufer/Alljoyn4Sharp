@@ -23,12 +23,6 @@ namespace AllJoyn4Sharp_console
 
         [RemoteMethod]
         int mySum(int a, int b);
-
-        [RemoteMethod]
-        string brol();
-    
-        [RemoteMethod]
-        double gettt();
     }
 
     public class NetObject : IObject
@@ -55,11 +49,6 @@ namespace AllJoyn4Sharp_console
                 Test();
             }
         }
-
-        [RemoteMethod]
-        public string brol() { return "You called Brol!" + '\0'; }
-        [RemoteMethod]
-        public double gettt() { return 1.2; }
         [RemoteMethod]
         public string cat(string s1, string s2)
         {

@@ -24,12 +24,6 @@ namespace AllJoyn4Sharp_console_client
 
         [RemoteMethod]
         int mySum(int a, int b);
-
-        [RemoteMethod]
-        string brol();
-
-        [RemoteMethod]
-        double gettt();
     }
 
     public class NetObject : IObject

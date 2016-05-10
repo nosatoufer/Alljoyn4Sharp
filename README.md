@@ -2,8 +2,6 @@
 
 ### How do I get set up? ###
 
-* Summary of set up
-
 Add environment variables to find alljoyn lib :
 
 * ALLJOYN_SDK_COMMON == <PathToAlljoyn>\alljoyn\common\inc
@@ -20,7 +18,7 @@ Create an interface for all the methods / event you will use between the client 
 Create the class implementing all the methods of the interface.
 * Creation of the server/client  
 1. Create the server or client using the NativeHelper  
-2. Assign the method you want to be called to the event you want to listen to
+1. Assign the method you want to be called to the event you want to listen to
 * Method / event call  
 All the methods call and event are used by giving the name of the method/event and an array of object containing the parameters.
   
