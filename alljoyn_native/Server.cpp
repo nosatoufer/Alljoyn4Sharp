@@ -13,23 +13,16 @@ Server::Server(std::string prefix, std::string name) : AllJoynBase(), mName(name
 
 Server::~Server()
 {
-	printf("1\n");
 	if (mConnectionListener)
 	{
 		mBus->UnregisterBusListener(*mConnectionListener);
 		delete mConnectionListener;
 	}
-	printf("2\n");
 
 	if (mBusObject)
 		mBus->UnregisterBusObject(*mBusObject);
-	printf("3\n");
 
 	AllJoynBase::Stop();
-	printf("4\n");
-
-	printf("5\n");
-
 }
 
 QStatus Server::CreateBusObject(void)

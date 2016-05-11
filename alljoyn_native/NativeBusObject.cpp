@@ -14,7 +14,6 @@ NativeBusObject::NativeBusObject(BusAttachment & bus, std::string advName, std::
 NativeBusObject::~NativeBusObject()
 {
 	delete mProxy;
-	printf("~NativeBus");
 }
 
 QStatus NativeBusObject::SendSignal(std::string intfName, MsgArg * msgs[], int size)

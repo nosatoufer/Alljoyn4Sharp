@@ -160,9 +160,7 @@ extern "C"
 	__declspec(dllexport)
 		void __stdcall Client_Destroy(NativeClient client)
 	{
-		printf("Client_Destroy\n");
 		delete client.engine;
-		printf("Client_Destroyed\n");
 
 	};
 
@@ -335,8 +333,6 @@ extern "C"
 		for (size_t i = 0; i < numArg; i++)
 		{
 			values[i] = msgValues[i];
-			printf("Values[%d] = %f\n", i, values[i]);
-
 		}
 		return (int)s;
 	}

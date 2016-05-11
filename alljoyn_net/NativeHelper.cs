@@ -329,7 +329,6 @@ namespace alljoyn_net
                 sign = "";
             Marshal.FreeHGlobal(stringBuff);
             stringBuff = IntPtr.Zero;
-            Console.WriteLine("MessageSignature {0}", sign);
             return sign;
         }
 
@@ -455,11 +454,8 @@ namespace alljoyn_net
                     */
                     throw new System.NotSupportedException("Type not supported");
                 case 'd':
-                    Console.WriteLine("Extract double array");
                     double[] d = new double[MsgArgGetNumArguments(msg, "ad")];
                     MsgArgGetDoubleArray(msg, d);
-                    foreach (double a in d)
-                        Console.WriteLine("{0}", a);
                     return d;
                 case 'b':
                     bool[] b = new bool[MsgArgGetNumArguments(msg, "ab")];
@@ -478,7 +474,6 @@ namespace alljoyn_net
         /// <param name="sign">The string containing all the Alljoyn type to extract</param>
         public static void extractValues(Object[] output, IntPtr message, string sign)
         {
-            Console.WriteLine("Extracting signature : {0}", sign);
             int pos = 0;
             for (int i = 0; pos < sign.Length; i++, pos++)
             {
@@ -494,8 +489,6 @@ namespace alljoyn_net
         /// <returns></returns>
         public static IntPtr CreateReply(string sig, Object value)
         {
-            Console.WriteLine("CreateReply");
-            Console.WriteLine("{0}", value);
             switch (sig)
             {
                 case "Int32":

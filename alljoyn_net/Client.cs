@@ -98,7 +98,6 @@ namespace alljoyn_net
                 {
                     if (sig[i].ParameterType != vars[i].GetType())
                     {
-                        Console.WriteLine("sig = {0} ?= vars = {1}", sig[i].ParameterType.Name, vars[i].GetType().Name);
                         string s = "Expected : " + sig[i].ParameterType.Name + " got : " + vars[i].GetType().Name;
                         throw new ApplicationException(s);
                     }

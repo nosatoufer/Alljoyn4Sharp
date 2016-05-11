@@ -33,6 +33,7 @@ QStatus AllJoynBase::CreateInterface()
 		return status;
 	}
 	else {
+		
 		printf("Failed to create interface \"%s\" (%s)\n", CHAT_SERVICE_INTERFACE_NAME, QCC_StatusText(status));
 	}
 
