@@ -1,14 +1,9 @@
 # README #
+## What does it do ?
+Alljoyn4Sharp is a C++/C# module to use the AllJoyn framework. It allows multiples remotes application to communicate through event and method calls. 
 
-### How do I get set up? ###
-
-Add environment variables to find alljoyn lib :
-
-* ALLJOYN_SDK_COMMON == <PathToAlljoyn>\alljoyn\common\inc
-* ALLJOYN_SDK_HOME == <PathToAlljoyn>\alljoyn
-* ALLJOYN_SDK_INC == <PathToAlljoyn>\alljoyn\build\win7\x86\debug\dist\cpp\inc
-
-Change the platform to Win32 on Visual studio  
+## Setting it up
+See the wiki pages
 
 ## How to use it ?
 
