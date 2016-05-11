@@ -13,7 +13,7 @@ namespace alljoyn_net
     /// </summary>
     internal class NativeHelper
     {
-        
+
         public static void BindEvents<T>(Type generic, T obj)
         {
             Type type = typeof(T);
@@ -350,6 +350,9 @@ namespace alljoyn_net
                     case "Int32":
                         msgs[i] = CreateMsgArgInt((int)values[i]);
                         break;
+                    case "Int64":
+                        msgs[i] = CreateMsgArgLong((long)values[i]);
+                        break;
                     case "Double":
                         msgs[i] = CreateMsgArgDouble((double)values[i]);
                         break;
@@ -358,6 +361,18 @@ namespace alljoyn_net
                         break;
                     case "Boolean":
                         msgs[i] = CreateMsgArgBool((bool)values[i]);
+                        break;
+                    case "Int32[]":
+                        msgs[i] = CreateMsgArgIntArray((int[])values[i], ((int[])values[i]).Length);
+                        break;
+                    case "Int64[]":
+                        msgs[i] = CreateMsgArgLongArray((long[])values[i], ((long[])values[i]).Length);
+                        break;
+                    case "Double[]":
+                        msgs[i] = CreateMsgArgDoubleArray((double[])values[i], ((double[])values[i]).Length);
+                        break;
+                    case "Boolean[]":
+                        msgs[i] = CreateMsgArgBoolArray((bool[])values[i], ((bool[])values[i]).Length);
                         break;
                     case "Void":
                         break;
@@ -370,29 +385,86 @@ namespace alljoyn_net
         }
 
         /// <summary>
-        /// Extracts the first value of the message
+        /// Extracts the value of the MsgArg
         /// </summary>
         /// <param name="message">The message containing the value</param>
         /// <param name="t">The C# type of the value</param>
         /// <returns></returns>
-        public static Object extractValue(IntPtr message, Type t)
+        public static Object extractValue(IntPtr msg, string type, ref int pos)
         {
-            switch (t.Name)
+            Object val = 0;
+            switch (type[pos])
             {
-                case "Int32":
-                    return MsgArgGetInt(message);
-                case "Double":
-                    return MsgArgGetDouble(message);
-                case "String":
-                    IntPtr stringBuff = Marshal.AllocHGlobal(1024);
-                    int sSize = MsgArgGetStringPtr(message, stringBuff);
-                    stringBuff = Marshal.ReAllocHGlobal(stringBuff, (IntPtr)sSize);
-                    string str = Marshal.PtrToStringAnsi(stringBuff);
-                    Marshal.FreeHGlobal(stringBuff);
-                    stringBuff = IntPtr.Zero;
-                    return str;
-                case "Boolean":
-                    return MsgArgGetBool(message);
+                case 'i':
+                    val = MsgArgGetInt(msg);
+                    break;
+                case 'x':
+                    val = MsgArgGetLong(msg);
+                    break;
+                case 's':
+                    IntPtr stringPtr = Marshal.AllocHGlobal(1024);
+                    int sSize = MsgArgGetStringPtr(msg, stringPtr);
+                    stringPtr = Marshal.ReAllocHGlobal(stringPtr, (IntPtr)sSize);
+                    val = Marshal.PtrToStringAnsi(stringPtr);
+                    Marshal.FreeHGlobal(stringPtr);
+                    break;
+                case 'd':
+                    val = MsgArgGetDouble(msg);
+                    break;
+                case 'b':
+                    val = MsgArgGetBool(msg);
+                    break;
+                case 'a':
+                    pos++;
+                    val = ExtractArray(msg, type, pos);
+                    break;
+                default:
+                    throw new System.NotSupportedException("Type not supported");
+            }
+            return val;
+        }
+
+        /// <summary>
+        /// Extracts an array from the message and returns it as an object
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="type"></param>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static Object ExtractArray(IntPtr msg, string type, int pos)
+        {
+            Object val = 0;
+            switch (type[pos])
+            {
+                case 'i':
+                    int[] i = new int[MsgArgGetNumArguments(msg, "ai")];
+                    MsgArgGetIntArray(msg, i);
+                    return i;
+                case 'x':
+                    long[] l = new long[MsgArgGetNumArguments(msg, "ax")];
+                    MsgArgGetLongArray(msg, l);
+                    return l;
+                case 's':
+                    /*
+                    IntPtr stringPtr = Marshal.AllocHGlobal(1024);
+                    int sSize = MsgArgGetStringPtr(msg, stringPtr);
+                    stringPtr = Marshal.ReAllocHGlobal(stringPtr, (IntPtr)sSize);
+                    val = Marshal.PtrToStringAnsi(stringPtr);
+                    Marshal.FreeHGlobal(stringPtr);
+                    break;
+                    */
+                    throw new System.NotSupportedException("Type not supported");
+                case 'd':
+                    Console.WriteLine("Extract double array");
+                    double[] d = new double[MsgArgGetNumArguments(msg, "ad")];
+                    MsgArgGetDoubleArray(msg, d);
+                    foreach (double a in d)
+                        Console.WriteLine("{0}", a);
+                    return d;
+                case 'b':
+                    bool[] b = new bool[MsgArgGetNumArguments(msg, "ab")];
+                    MsgArgGetBoolArray(msg, b);
+                    return b;
                 default:
                     throw new System.NotSupportedException("Type not supported");
             }
@@ -407,33 +479,10 @@ namespace alljoyn_net
         public static void extractValues(Object[] output, IntPtr message, string sign)
         {
             Console.WriteLine("Extracting signature : {0}", sign);
-            IntPtr msgArg;
-            for (int i = 0; i < sign.Length; i++)
+            int pos = 0;
+            for (int i = 0; pos < sign.Length; i++, pos++)
             {
-                msgArg = MessageGetArg(message, i);
-                switch (sign[i])
-                {
-                    case 'i':
-                        output[i] = MsgArgGetInt(msgArg);
-                        break;
-                    case 's':
-                        IntPtr stringPtr = Marshal.AllocHGlobal(1024);
-                        int sSize = MsgArgGetStringPtr(msgArg, stringPtr);
-                        stringPtr = Marshal.ReAllocHGlobal(stringPtr, (IntPtr)sSize);
-                        output[i] = Marshal.PtrToStringAnsi(stringPtr);
-                        Marshal.FreeHGlobal(stringPtr);
-                        break;
-                    case 'd':
-                        output[i] = MsgArgGetDouble(msgArg);
-                        break;
-                    case 'b':
-                        output[i] = MsgArgGetBool(msgArg);
-                        break;
-                    case '0':
-                        return;
-                    default:
-                        throw new System.NotSupportedException("Type not supported");
-                }
+                output[i] = extractValue(NativeHelper.MessageGetArg(message, i), sign, ref pos);
             }
         }
 
@@ -503,7 +552,7 @@ namespace alljoyn_net
         [DllImport("alljoyn_native.dll")]
         internal static extern void Server_SetMethodHandler(NativeServer server, ChatMethod func);
 
-        
+
         [DllImport("alljoyn_native.dll")]
         internal static extern void Server_SetSignalHandler(NativeServer server, ChatSignal func);
         [DllImport("alljoyn_native.dll")]
@@ -557,6 +606,9 @@ namespace alljoyn_net
         internal static extern int MsgArgGetInt(IntPtr msgArg);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern long MsgArgGetLong(IntPtr msgArg);
+
+        [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetStringPtr(IntPtr msg, IntPtr buff);
 
         [DllImport("alljoyn_native.dll")]
@@ -567,7 +619,7 @@ namespace alljoyn_net
 
         [DllImport("alljoyn_native.dll")]
         internal static extern int MessageGetSignature(IntPtr msg, IntPtr buff);
-        
+
         [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgBool(bool val);
 
@@ -575,11 +627,41 @@ namespace alljoyn_net
         internal static extern IntPtr CreateMsgArgInt(int val);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgLong(long val);
+        [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgDouble(double val);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgString(string val);
 
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgIntArray(int[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgLongArray(long[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgDoubleArray(double[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgBoolArray(bool[] val, int size);
+
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetNumArguments(IntPtr msg, string type);
+
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetDoubleArray(IntPtr msg, double[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetIntArray(IntPtr msg, int[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetLongArray(IntPtr msg, long[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetBoolArray(IntPtr msg, bool[] values);
 
         #endregion
 

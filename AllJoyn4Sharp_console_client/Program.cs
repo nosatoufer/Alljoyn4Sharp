@@ -24,6 +24,11 @@ namespace AllJoyn4Sharp_console_client
 
         [RemoteMethod]
         int mySum(int a, int b);
+        [RemoteMethod]
+        double mySumArray(double[] a);
+
+        [RemoteMethod]
+        double SumDouble(double a, double b);
     }
 
     public class NetObject : IObject
@@ -57,6 +62,18 @@ namespace AllJoyn4Sharp_console_client
         public int mySum(int a, int b)
         {
             return a + b;
+        }
+
+        [RemoteMethod]
+        public double SumDouble(double a, double b)
+        {
+            return a + b;
+        }
+
+        [RemoteMethod]
+        public double mySumArray(double[] a)
+        {
+            return 0;
         }
 
         public void FireEvent(string name, Object[] vars)
@@ -112,13 +129,21 @@ namespace AllJoyn4Sharp_console_client
                     nObject.OnChat(str);
                 }
                 str = Console.ReadLine();
-                vars = new Object[2];
-                vars[0] = 123;
-                vars[1] = 321;
-                c.CallMethod("mySum", vars);
+                vars = new Object[1];
+                double[] varsI = new double[6];
+                varsI[0] = 123.10d;
+                varsI[1] = 321.034d;
+                varsI[2] = 1.00012d;
+                varsI[3] = 0.9999d;
+                varsI[4] = 1.00021d;
+                varsI[5] = 1.123d;
+                vars[0] = varsI;
+
+                c.CallMethod("mySumArray", vars);
+                Console.WriteLine("Enter \"quit\" to leave");
+                str = Console.ReadLine();
 
             }
-            c.Disconnect();
         }
     }
 }

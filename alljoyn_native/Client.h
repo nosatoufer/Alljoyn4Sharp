@@ -5,7 +5,6 @@
 #include "AllJoynBase.h"
 #include "ConnectionListener.h"
 #include "NativeBusObject.h"
-#include <cassert>
 
 /**
 * Class representing a client Alljoyn
@@ -24,7 +23,7 @@ public:
 	//int Disconnect();
 	void SetJoinComplete(bool joined);
 
-	const MsgArg* CallMethod(std::string member, MsgArg** msgs, int size);
+	const Message* CallMethod(std::string member, MsgArg** msgs, int size);
 	void SetSignalCall(SignalEvent func);
 	QStatus RegisterSignalHandler(std::string memberName);
 

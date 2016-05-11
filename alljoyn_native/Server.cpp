@@ -13,12 +13,28 @@ Server::Server(std::string prefix, std::string name) : AllJoynBase(), mName(name
 
 Server::~Server()
 {
+	printf("1\n");
+	if (mConnectionListener)
+	{
+		mBus->UnregisterBusListener(*mConnectionListener);
+		delete mConnectionListener;
+	}
+	printf("2\n");
+
+	if (mBusObject)
+		mBus->UnregisterBusObject(*mBusObject);
+	printf("3\n");
+
+	AllJoynBase::Stop();
+	printf("4\n");
+
+	printf("5\n");
 
 }
 
 QStatus Server::CreateBusObject(void)
 {
-	if (mBusObject = new NativeBusObject(*mBus, mAdvertisedName, CHAT_SERVICE_OBJECT_PATH, &mSessionId, CHAT_SERVICE_INTERFACE_NAME ))
+	if (mBusObject = new NativeBusObject(*mBus, mAdvertisedName, CHAT_SERVICE_OBJECT_PATH, &mSessionId, CHAT_SERVICE_INTERFACE_NAME))
 		return QStatus::ER_OK;
 	else
 		return QStatus::ER_FAIL;
@@ -188,7 +204,7 @@ int Server::Start()
 int Server::Stop() {
 	AllJoynBase::Stop();
 	delete mBusObject;
-//	delete mConnectionListener;
+	//	delete mConnectionListener;
 	delete mBusObject;
 	return 0;//(int)status;
 }

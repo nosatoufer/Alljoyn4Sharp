@@ -4,7 +4,6 @@
 #include "AllJoynBase.h"
 #include "NativeBusObject.h"
 #include "ConnectionListener.h"
-#include <cassert>
 
 //static const char* CHAT_SERVICE_NAME = "org.alljoyn.bus.samples"; // USED TO ADVERTISE THE SERVICE
 

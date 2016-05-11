@@ -160,7 +160,10 @@ extern "C"
 	__declspec(dllexport)
 		void __stdcall Client_Destroy(NativeClient client)
 	{
+		printf("Client_Destroy\n");
 		delete client.engine;
+		printf("Client_Destroyed\n");
+
 	};
 
 	__declspec(dllexport)
@@ -185,7 +188,7 @@ extern "C"
 	
 
 	__declspec(dllexport)
-		const MsgArg* __stdcall Client_CallMethod(NativeClient client, const char * member, MsgArg** msgs, int size)
+		const Message* __stdcall Client_CallMethod(NativeClient client, const char * member, MsgArg** msgs, int size)
 	{
 		return client.engine->CallMethod(member, msgs, size);
 
@@ -207,43 +210,6 @@ extern "C"
 
 #pragma endregion Client
 
-#pragma region NativeSignal
-	__declspec(dllexport)
-		NativeSignal __stdcall NativeSignal_Create(int num) {
-		NativeSignal signal;
-		signal.numargs = num;
-		signal.args = new MsgArg[num];
-		signal.data = (void **)malloc(sizeof(void *)*num);
-		memset((void*)signal.data, 0, sizeof(void *)*num);
-		printf("Creating a signal numargs = %d (%d)\n", signal.numargs, signal.args);
-		return signal;
-	};
-
-
-	__declspec(dllexport)
-		void __stdcall NativeSignal_AddString(NativeSignal signal, const char * data, int length, int pos) {
-		// WARNINGHere you want to make a copy because after managed call finished our string is garbage collected.
-		signal.data[pos] = (char *)malloc(sizeof(char)*(length + 1));
-		memcpy((char*)signal.data[pos], data, sizeof(char)*(length + 1));
-		signal.args[pos].Set("s", (char*)signal.data[pos]);
-		printf("Setting a signal numags = %d (%d)\n", signal.numargs, signal.data[pos]);
-		printf("Setting %d parameter to %s\n", pos, signal.data[pos]);
-		printf("    From object: %s (%d)\n", signal.args[pos].v_string.str, signal.args[pos].v_string.str);
-	};
-
-	void NativeSignal_Destroy(NativeSignal & signal) {
-		delete[] signal.args;
-		for (int i = 0; i < signal.numargs; i++) {
-			if (signal.data[i] != NULL) {
-				free(signal.data[i]);
-				signal.data[i] = 0;
-			}
-		}
-		free((void *)signal.data);
-		signal.data = 0;
-		signal.numargs = 0;
-	}
-#pragma endregion NativeSignal
 
 #pragma region Alljoyn Wrapper
 	/// AllJoyn wrapper for MsgArg and Message
@@ -258,6 +224,13 @@ extern "C"
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("i", val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgLong(long val)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("x", val);
 		return nMsgArg;
 	}
 	__declspec(dllexport)
@@ -283,6 +256,32 @@ extern "C"
 		return nMsgArg;
 	}
 
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgIntArray(int* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("ai", numArgs, val);
+		return nMsgArg;
+	}	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgLongArray(long long* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("ax", numArgs, val);
+		return nMsgArg;
+	}	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgDoubleArray(double* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("ad", numArgs, val);
+		return nMsgArg;
+	}	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgBoolArray(bool* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("ab", numArgs, val);
+		return nMsgArg;
+	}
+
 
 	__declspec(dllexport)
 		int __stdcall MsgArgGetStringPtr(const MsgArg* msg, char *buff)
@@ -297,6 +296,11 @@ extern "C"
 		int __stdcall MsgArgGetInt(MsgArg* mess)
 	{
 		return mess->v_int32;
+	}	
+	__declspec(dllexport)
+		long long __stdcall MsgArgGetLong(MsgArg* mess)
+	{
+		return mess->v_int64;
 	}
 	__declspec(dllexport)
 		double __stdcall MsgArgGetDouble(MsgArg* msg)
@@ -313,6 +317,62 @@ extern "C"
 		return val;
 	}
 
+	__declspec(dllexport)
+		int __stdcall MsgArgGetNumArguments(MsgArg* msg, const char * type)
+	{
+		size_t numArg = 0;
+		void * val;
+		msg->Get(type, &numArg, &val);
+		return numArg;
+	}
+
+	__declspec(dllexport)
+		int __stdcall MsgArgGetDoubleArray(MsgArg* msg, double * values)
+	{
+		double* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("ad", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+		{
+			values[i] = msgValues[i];
+			printf("Values[%d] = %f\n", i, values[i]);
+
+		}
+		return (int)s;
+	}
+
+	__declspec(dllexport)
+		int __stdcall MsgArgGetIntArray(MsgArg* msg, int * values)
+	{
+		int* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("ai", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
+
+	__declspec(dllexport)
+		int __stdcall MsgArgGetLongArray(MsgArg* msg, long long* values)
+	{
+		long long* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("ax", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
+
+	__declspec(dllexport)
+		int __stdcall MsgArgGetBoolArray(MsgArg* msg, bool * values)
+	{
+		bool* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("ab", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
 
 	__declspec(dllexport)
 		int __stdcall MessageGetSignature(Message * msg, char * buff)

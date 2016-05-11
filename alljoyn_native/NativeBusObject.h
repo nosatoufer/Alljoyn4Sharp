@@ -23,10 +23,11 @@ public:
 
 	~NativeBusObject();
 
+
 	//Sends a Signal to the session
 	QStatus SendSignal(std::string intfName, MsgArg* msgs[], int size);
 	//Calls a method
-	const MsgArg* CallMethod(std::string member, MsgArg * msgs[], int size);
+	const Message* CallMethod(std::string member, MsgArg * msgs[], int size);
 
 	//Sets the function that will be called on method received
 	void SetMethodCall(MethodCall func);

@@ -125,14 +125,14 @@ QStatus AllJoynBase::Initialize()
 	if ((status = AllJoynInit()) != ER_OK) {
 		return status;
 	}
-	//#ifdef ROUTER
+#ifdef ROUTER
 	if ((status = AllJoynRouterInit()) != ER_OK) {
 		AllJoynShutdown();
 		return status;
 	}
-	//#endif
+#endif
 
-		/* Install SIGINT handler. */
+	/* Install SIGINT handler. */
 	signal(SIGINT, AllJoynBase::SigIntHandler);
 
 	status = ER_OK;
@@ -177,14 +177,16 @@ QStatus AllJoynBase::Start()
 }
 
 QStatus AllJoynBase::Stop() {
+	printf("Alljoyn stop in\n");
+
 	if (mBus) {
 		delete mBus;
 		mBus = NULL;
 	}
 
-	//#ifdef ROUTER
+#ifdef ROUTER
 	QStatus status;
 	status = AllJoynRouterShutdown();
-	//#endif
+#endif
 	return AllJoynShutdown();
 }

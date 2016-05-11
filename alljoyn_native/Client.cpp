@@ -110,8 +110,11 @@ Client::Client(std::string prefix, std::string name) : AllJoynBase(), mName(name
 
 Client::~Client()
 {
+	mBus->UnregisterBusListener(*mConnectionListener);
+	mBus->UnregisterBusObject(*mBusObject);
 	AllJoynBase::Stop();
-	delete mBusObject;
+	delete mConnectionListener;
+	//delete mBusObject;
 }
 
 int Client::Initialize()
@@ -154,7 +157,7 @@ void Client::SetJoinComplete(bool joined)
 	mJoinComplete = joined;
 }
 
-const MsgArg * Client::CallMethod(std::string member, MsgArg ** msgs, int size)
+const Message * Client::CallMethod(std::string member, MsgArg ** msgs, int size)
 {
 	return mBusObject->CallMethod(member, msgs, size);
 

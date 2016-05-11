@@ -5,7 +5,6 @@ NativeBusObject::NativeBusObject(BusAttachment & bus, std::string advName, std::
 	: BusObject(path.c_str()), mSessionId(sessionId), mBus(bus), mProxy(nullptr)
 {
 	mIntf = bus.GetInterface(intfName.c_str());
-	// ?? assert(mIntf);
 	AddInterface(*mIntf);
 
 	mProxy = new ProxyBusObject(bus, advName.c_str(), path.c_str(), *mSessionId);
@@ -14,6 +13,8 @@ NativeBusObject::NativeBusObject(BusAttachment & bus, std::string advName, std::
 
 NativeBusObject::~NativeBusObject()
 {
+	delete mProxy;
+	printf("~NativeBus");
 }
 
 QStatus NativeBusObject::SendSignal(std::string intfName, MsgArg * msgs[], int size)
@@ -33,7 +34,7 @@ QStatus NativeBusObject::SendSignal(std::string intfName, MsgArg * msgs[], int s
 	return status;
 }
 
-const MsgArg * NativeBusObject::CallMethod(std::string member, MsgArg * msgs[], int size)
+const Message * NativeBusObject::CallMethod(std::string member, MsgArg * msgs[], int size)
 {
 	QStatus status = ER_OK;
 	if (mProxy)
@@ -46,14 +47,12 @@ const MsgArg * NativeBusObject::CallMethod(std::string member, MsgArg * msgs[], 
 		ajn::Message reply(mBus);
 		if ((status = mProxy->MethodCall(*(mIntf->GetMember(member.c_str())), msg.data(), size, reply, 400)) == ER_OK)
 		{
-			MsgArg * receivedMsg = new MsgArg(*reply->GetArg(0));
-			receivedMsg->Stabilize();
 			for (int i = 0; i < size; i++)
 			{
 				delete msgs[i];
 			}
-
-			return receivedMsg;
+			Message * copiedReply = new Message(reply);
+			return copiedReply;
 		}
 	}
 	printf("else : Status of methodcall = %s\n", QCC_StatusText(status));

@@ -41,6 +41,10 @@ namespace alljoyn_net
             NativeHelper.Client_RegisterCreateInterface(_nativeClient.Value,
                                 CreateInterface);
         }
+        ~Client()
+        {
+            NativeHelper.Client_Destroy(_nativeClient.Value);
+        }
 
         /// <summary>
         /// Manages the received signal
@@ -82,7 +86,7 @@ namespace alljoyn_net
         /// </summary>
         /// <param name="name">The name of the method to call</param>
         /// <param name="vars">All the parameters that will be sent</param>
-        public Object CallMethod(string name, object[] vars)
+        public Object[] CallMethod(string name, object[] vars)
         {
             Console.WriteLine("Method name = {0}", name);
             Type type = typeof(T);
@@ -92,7 +96,7 @@ namespace alljoyn_net
                 ParameterInfo[] sig = mInfo.GetParameters();
                 for (int i = 0; i < vars.Length; i++)
                 {
-                    if(sig[i].ParameterType != vars[i].GetType())
+                    if (sig[i].ParameterType != vars[i].GetType())
                     {
                         Console.WriteLine("sig = {0} ?= vars = {1}", sig[i].ParameterType.Name, vars[i].GetType().Name);
                         string s = "Expected : " + sig[i].ParameterType.Name + " got : " + vars[i].GetType().Name;
@@ -101,18 +105,23 @@ namespace alljoyn_net
                 }
 
                 IntPtr[] msgs = NativeHelper.CreateMessages(vars);
-                IntPtr reply = NativeHelper.Client_CallMethod(_nativeClient.Value, name, msgs, msgs.Length);
-                if (reply != IntPtr.Zero)
+                IntPtr message = NativeHelper.Client_CallMethod(_nativeClient.Value, name, msgs, msgs.Length);
+                if (message != IntPtr.Zero)
                 {
-                    Object replyValue = NativeHelper.extractValue(reply, mInfo.ReturnType);
-                    Console.WriteLine("Value received : {0}", replyValue);
+                    string signature = NativeHelper.MessageSignature(message);
+                    Object[] replyValue = new Object[signature.Length];
+                    if (signature.Length > 0)
+                    {
+                        NativeHelper.extractValues(replyValue, message, signature);
+                        Console.WriteLine("Value received : {0}", replyValue);
+                    }
                     return replyValue;
                 }
                 else
                 {
                     Console.WriteLine("Nothing was returned");
                 }
-                
+
             }
             return null;
 

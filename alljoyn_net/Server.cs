@@ -13,13 +13,6 @@ namespace alljoyn_net
         public IntPtr engine;
     }
 
-    struct NativeSignal
-    {
-        public int numargs;
-        public IntPtr args;
-        public IntPtr blocks;
-    }
-
 
     internal delegate bool AddInterfaceMemberCallback(string name, string inputSig, string outSig, string argNames, int memberType);
     public delegate void CreateInterfaceCallback();
@@ -89,31 +82,15 @@ namespace alljoyn_net
             MethodInfo method = type.GetMethod(memberName);
 
             Console.WriteLine("Member = " + memberName);
-            string sign = NativeHelper.MessageSignature(msg);
-            Object[] values = new Object[sign.Length];
+            Object[] values = new Object[method.GetParameters().Length];
 
+            string sign = NativeHelper.MessageSignature(msg);
             NativeHelper.extractValues(values, msg, sign);
-            for (int i = 0; i < values.Length; i++)
-                Console.WriteLine("Value {0} = {1}", i, values[i]);
             Object ret = method.Invoke(_remoteObj, values);
             IntPtr reply = NativeHelper.CreateReply(method.ReturnParameter.ParameterType.Name, ret);
             return reply;
         }
-        public void test()
-        {
-            IntPtr[] msgs = new IntPtr[0];
 
-            //msgs[0] = NativeHelper.CreateReply(t.Name, vars);
-            NativeHelper.Server_SendSignal(_nativeServer.Value, "Test", null, 0);
-
-            msgs = new IntPtr[1];
-            Object vars;
-            vars = "Testing chat";
-            Type t = typeof(String);
-            msgs[0] = NativeHelper.CreateReply(t.Name, vars);
-            NativeHelper.Server_SendSignal(_nativeServer.Value, "Chat", msgs, msgs.Length);
-
-        }
         public void SendEvent(string name, Object[] vars)
         {
             Console.WriteLine("SendEvent {0}", name);
@@ -124,12 +101,6 @@ namespace alljoyn_net
                 IntPtr[] msgs = NativeHelper.CreateMessages(vars);
                 NativeHelper.Server_SendSignal(_nativeServer.Value, name, msgs, msgs.Length);
             }
-        }
-
-        private int ReceiveString(string str)
-        {
-            Console.WriteLine("Received string: " + str);
-            return 0;
         }
 
         #endregion Type callbacks
@@ -248,7 +219,7 @@ namespace alljoyn_net
         {
             if (!_nativeServer.HasValue)
                 throw new ApplicationException("Server was not initialized!");
-            NativeHelper.Server_Stop(_nativeServer.Value);
+            NativeHelper.Server_Destroy(_nativeServer.Value);
         }
 
 
