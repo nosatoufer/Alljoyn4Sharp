@@ -210,13 +210,32 @@ extern "C"
 
 
 #pragma region Alljoyn Wrapper
+
 	/// AllJoyn wrapper for MsgArg and Message
 	__declspec(dllexport)
 		const MsgArg* __stdcall MessageGetArg(Message * message, int index)
 	{
 		return (*message)->GetArg(index);
 	}
-
+	__declspec(dllexport)
+		int __stdcall MessageGetSignature(Message * msg, char * buff)
+	{
+		const char * ret = (*msg)->GetSignature();
+		if (strlen(ret) != 0)
+		{
+			strcpy_s(buff, 1024, ret);
+			return strlen(buff) + 1;
+		}
+		return 0;
+	}
+#pragma region MsgArgConstructors
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgShort(short val)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("n", val);
+		return nMsgArg;
+	}
 	__declspec(dllexport)
 		const NativeMsgArg __stdcall CreateMsgArgInt(int val)
 	{
@@ -231,6 +250,28 @@ extern "C"
 		nMsgArg.msg = new MsgArg("x", val);
 		return nMsgArg;
 	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgShortUInt(uint16_t val)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("q", val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgUInt(uint32_t val)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("u", val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgLongUInt(uint64_t val)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("t", val);
+		return nMsgArg;
+	}
+
 	__declspec(dllexport)
 		NativeMsgArg __stdcall CreateMsgArgDouble(double val)
 	{
@@ -255,31 +296,64 @@ extern "C"
 	}
 
 	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgShortArray(short* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("an", numArgs, val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
 		const NativeMsgArg __stdcall CreateMsgArgIntArray(int* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ai", numArgs, val);
 		return nMsgArg;
-	}	__declspec(dllexport)
+	}
+	__declspec(dllexport)
 		const NativeMsgArg __stdcall CreateMsgArgLongArray(long long* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ax", numArgs, val);
 		return nMsgArg;
-	}	__declspec(dllexport)
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgShortUIntArray(uint16_t* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("aq", numArgs, val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgUIntArray(uint32_t* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("au", numArgs, val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
+		const NativeMsgArg __stdcall CreateMsgArgLongUIntArray(uint64_t* val, int numArgs)
+	{
+		NativeMsgArg nMsgArg;
+		nMsgArg.msg = new MsgArg("at", numArgs, val);
+		return nMsgArg;
+	}
+	__declspec(dllexport)
 		const NativeMsgArg __stdcall CreateMsgArgDoubleArray(double* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ad", numArgs, val);
 		return nMsgArg;
-	}	__declspec(dllexport)
+	}	
+	__declspec(dllexport)
 		const NativeMsgArg __stdcall CreateMsgArgBoolArray(bool* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ab", numArgs, val);
 		return nMsgArg;
 	}
+#pragma endregion
 
+#pragma region MsgArgGetters
 
 	__declspec(dllexport)
 		int __stdcall MsgArgGetStringPtr(const MsgArg* msg, char *buff)
@@ -289,7 +363,11 @@ extern "C"
 		return strlen(buff) + 1;
 
 	}
-
+	__declspec(dllexport)
+		int __stdcall MsgArgGetShort(MsgArg* mess)
+	{
+		return mess->v_int16;
+	}
 	__declspec(dllexport)
 		int __stdcall MsgArgGetInt(MsgArg* mess)
 	{
@@ -299,6 +377,21 @@ extern "C"
 		long long __stdcall MsgArgGetLong(MsgArg* mess)
 	{
 		return mess->v_int64;
+	}
+	__declspec(dllexport)
+		int __stdcall MsgArgGetShortUInt(MsgArg* mess)
+	{
+		return mess->v_uint16;
+	}
+	__declspec(dllexport)
+		int __stdcall MsgArgGetUInt(MsgArg* mess)
+	{
+		return mess->v_uint32;
+	}
+	__declspec(dllexport)
+		long long __stdcall MsgArgGetLongUInt(MsgArg* mess)
+	{
+		return mess->v_uint64;
 	}
 	__declspec(dllexport)
 		double __stdcall MsgArgGetDouble(MsgArg* msg)
@@ -336,7 +429,16 @@ extern "C"
 		}
 		return (int)s;
 	}
-
+	__declspec(dllexport)
+		int __stdcall MsgArgGetShortArray(MsgArg* msg, short * values)
+	{
+		short* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("an", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
 	__declspec(dllexport)
 		int __stdcall MsgArgGetIntArray(MsgArg* msg, int * values)
 	{
@@ -358,7 +460,36 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-
+	__declspec(dllexport)
+		int __stdcall MsgArgGetShortUIntArray(MsgArg* msg, uint16_t * values)
+	{
+		uint16_t* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("aq", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
+	__declspec(dllexport)
+		int __stdcall MsgArgGetUIntArray(MsgArg* msg, uint32_t * values)
+	{
+		uint32_t* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("au", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
+	__declspec(dllexport)
+		int __stdcall MsgArgGetLongUIntArray(MsgArg* msg, uint64_t * values)
+	{
+		uint64_t* msgValues;
+		size_t numArg;
+		QStatus s = msg->Get("at", &numArg, &msgValues);
+		for (size_t i = 0; i < numArg; i++)
+			values[i] = msgValues[i];
+		return (int)s;
+	}
 	__declspec(dllexport)
 		int __stdcall MsgArgGetBoolArray(MsgArg* msg, bool * values)
 	{
@@ -369,18 +500,9 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
+#pragma endregion
 
-	__declspec(dllexport)
-		int __stdcall MessageGetSignature(Message * msg, char * buff)
-	{
-		const char * ret = (*msg)->GetSignature();
-		if (strlen(ret) != 0)
-		{
-			strcpy_s(buff, 1024, ret);
-			return strlen(buff)+1;
-		}
-		return 0;
-	}
+
 
 #pragma endregion AllJoyn Wrapper
 

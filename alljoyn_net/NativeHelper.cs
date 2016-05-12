@@ -346,11 +346,23 @@ namespace alljoyn_net
             {
                 switch (o.GetType().Name)
                 {
+                    case "Int16":
+                        msgs[i] = CreateMsgArgShort((Int16)values[i]);
+                        break;
                     case "Int32":
                         msgs[i] = CreateMsgArgInt((int)values[i]);
                         break;
                     case "Int64":
                         msgs[i] = CreateMsgArgLong((long)values[i]);
+                        break;
+                    case "UInt16":
+                        msgs[i] = CreateMsgArgShortUInt((UInt16)values[i]);
+                        break;
+                    case "UInt32":
+                        msgs[i] = CreateMsgArgUInt((UInt32)values[i]);
+                        break;
+                    case "UInt64":
+                        msgs[i] = CreateMsgArgLongUInt((UInt64)values[i]);
                         break;
                     case "Double":
                         msgs[i] = CreateMsgArgDouble((double)values[i]);
@@ -361,11 +373,23 @@ namespace alljoyn_net
                     case "Boolean":
                         msgs[i] = CreateMsgArgBool((bool)values[i]);
                         break;
+                    case "Int16[]":
+                        msgs[i] = CreateMsgArgShortArray((Int16[])values[i], ((Int16[])values[i]).Length);
+                        break;
                     case "Int32[]":
                         msgs[i] = CreateMsgArgIntArray((int[])values[i], ((int[])values[i]).Length);
                         break;
                     case "Int64[]":
                         msgs[i] = CreateMsgArgLongArray((long[])values[i], ((long[])values[i]).Length);
+                        break;
+                    case "UInt16[]":
+                        msgs[i] = CreateMsgArgShortUIntArray((UInt16[])values[i], ((UInt16[])values[i]).Length);
+                        break;
+                    case "UInt32[]":
+                        msgs[i] = CreateMsgArgUIntArray((UInt32[])values[i], ((UInt32[])values[i]).Length);
+                        break;
+                    case "UInt64[]":
+                        msgs[i] = CreateMsgArgLongUIntArray((UInt64[])values[i], ((UInt64[])values[i]).Length);
                         break;
                     case "Double[]":
                         msgs[i] = CreateMsgArgDoubleArray((double[])values[i], ((double[])values[i]).Length);
@@ -391,14 +415,28 @@ namespace alljoyn_net
         /// <returns></returns>
         public static Object extractValue(IntPtr msg, string type, ref int pos)
         {
+
+
             Object val = 0;
             switch (type[pos])
             {
+                case 'n':
+                    val = MsgArgGetShort(msg);
+                    break;
                 case 'i':
                     val = MsgArgGetInt(msg);
                     break;
                 case 'x':
                     val = MsgArgGetLong(msg);
+                    break;
+                case 'q':
+                    val = MsgArgGetShortUInt(msg);
+                    break;
+                case 'u':
+                    val = MsgArgGetUInt(msg);
+                    break;
+                case 't':
+                    val = MsgArgGetLongUInt(msg);
                     break;
                 case 's':
                     IntPtr stringPtr = Marshal.AllocHGlobal(1024);
@@ -432,17 +470,33 @@ namespace alljoyn_net
         /// <returns></returns>
         public static Object ExtractArray(IntPtr msg, string type, int pos)
         {
-            Object val = 0;
+            Object val;
             switch (type[pos])
             {
+                case 'n':
+                    val = new Int16[MsgArgGetNumArguments(msg, "ax")];
+                    MsgArgGetShortArray(msg, (Int16[])val);
+                    break;
                 case 'i':
-                    int[] i = new int[MsgArgGetNumArguments(msg, "ai")];
-                    MsgArgGetIntArray(msg, i);
-                    return i;
+                    val = new int[MsgArgGetNumArguments(msg, "ai")];
+                    MsgArgGetIntArray(msg, (Int32[])val);
+                    break;
                 case 'x':
-                    long[] l = new long[MsgArgGetNumArguments(msg, "ax")];
-                    MsgArgGetLongArray(msg, l);
-                    return l;
+                    val = new long[MsgArgGetNumArguments(msg, "ax")];
+                    MsgArgGetLongArray(msg, (Int64[])val);
+                    break;
+                case 'q':
+                    val = new UInt16[MsgArgGetNumArguments(msg, "aq")];
+                    MsgArgGetShortUIntArray(msg, (UInt16[])val);
+                    break;
+                case 'u':
+                    val = new UInt32[MsgArgGetNumArguments(msg, "au")];
+                    MsgArgGetUIntArray(msg, (UInt32[])val);
+                    break;
+                case 't':
+                    val = new UInt64[MsgArgGetNumArguments(msg, "at")];
+                    MsgArgGetLongUIntArray(msg, (UInt64[])val);
+                    break;
                 case 's':
                     /*
                     IntPtr stringPtr = Marshal.AllocHGlobal(1024);
@@ -454,16 +508,17 @@ namespace alljoyn_net
                     */
                     throw new System.NotSupportedException("Type not supported");
                 case 'd':
-                    double[] d = new double[MsgArgGetNumArguments(msg, "ad")];
-                    MsgArgGetDoubleArray(msg, d);
-                    return d;
+                    val = new double[MsgArgGetNumArguments(msg, "ad")];
+                    MsgArgGetDoubleArray(msg, (double[])val);
+                    break;
                 case 'b':
-                    bool[] b = new bool[MsgArgGetNumArguments(msg, "ab")];
-                    MsgArgGetBoolArray(msg, b);
-                    return b;
+                    val = new bool[MsgArgGetNumArguments(msg, "ab")];
+                    MsgArgGetBoolArray(msg, (bool[])val);
+                    break;
                 default:
                     throw new System.NotSupportedException("Type not supported");
             }
+            return val;
         }
 
         /// <summary>
@@ -596,10 +651,22 @@ namespace alljoyn_net
         internal static extern IntPtr MessageGetArg(IntPtr message, int index);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern short MsgArgGetShort(IntPtr msgArg);
+
+        [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetInt(IntPtr msgArg);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern long MsgArgGetLong(IntPtr msgArg);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern UInt16 MsgArgGetShortUInt(IntPtr msgArg);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern UInt32 MsgArgGetUInt(IntPtr msgArg);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern UInt64 MsgArgGetLongUInt(IntPtr msgArg);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetStringPtr(IntPtr msg, IntPtr buff);
@@ -617,10 +684,23 @@ namespace alljoyn_net
         internal static extern IntPtr CreateMsgArgBool(bool val);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgShort(short val);
+
+        [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgInt(int val);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgLong(long val);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgShortUInt(UInt16 val);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgUInt(UInt32 val);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgLongUInt(UInt64 val);
+
         [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgDouble(double val);
 
@@ -631,7 +711,19 @@ namespace alljoyn_net
         internal static extern IntPtr CreateMsgArgIntArray(int[] val, int size);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgShortArray(short[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgLongArray(long[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgUIntArray(UInt32[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgShortUIntArray(UInt16[] val, int size);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern IntPtr CreateMsgArgLongUIntArray(UInt64[] val, int size);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern IntPtr CreateMsgArgDoubleArray(double[] val, int size);
@@ -648,10 +740,22 @@ namespace alljoyn_net
         internal static extern int MsgArgGetDoubleArray(IntPtr msg, double[] values);
 
         [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetShortArray(IntPtr msg, short[] values);
+
+        [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetIntArray(IntPtr msg, int[] values);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetLongArray(IntPtr msg, long[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetShortUIntArray(IntPtr msg, UInt16[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetUIntArray(IntPtr msg, UInt32[] values);
+
+        [DllImport("alljoyn_native.dll")]
+        internal static extern int MsgArgGetLongUIntArray(IntPtr msg, UInt64[] values);
 
         [DllImport("alljoyn_native.dll")]
         internal static extern int MsgArgGetBoolArray(IntPtr msg, bool[] values);
