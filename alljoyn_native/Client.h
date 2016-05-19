@@ -45,8 +45,8 @@ private:
 
 
 
-	QStatus Client::FindAdvertisedName(void);
-	QStatus Client::WaitForJoinSessionCompletion(void);
+	QStatus FindAdvertisedName(void);
+	QStatus WaitForJoinSessionCompletion(void);
 
 	std::string mPrefix;
 	std::string mName;

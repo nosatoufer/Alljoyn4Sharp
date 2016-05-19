@@ -2,7 +2,7 @@
 
 
 NativeBusObject::NativeBusObject(BusAttachment & bus, std::string advName, std::string path, SessionId * sessionId, std::string intfName)
-	: BusObject(path.c_str()), mSessionId(sessionId), mBus(bus), mProxy(nullptr)
+	: BusObject(path.c_str()), mSessionId(sessionId), mBus(bus), mProxy(NULL)
 {
 	mIntf = bus.GetInterface(intfName.c_str());
 	AddInterface(*mIntf);
@@ -19,44 +19,46 @@ NativeBusObject::~NativeBusObject()
 QStatus NativeBusObject::SendSignal(std::string intfName, MsgArg * msgs[], int size)
 {
 	uint8_t flags = 0;
-	std::vector<MsgArg> msg(size);
+	MsgArg * msg = new MsgArg[size];
 	for (int i = 0; i < size; i++)
 	{
-		msg.at(i) = *msgs[i];
-		msg.at(i).Stabilize();
+		msg[i] = *msgs[i];
+		msg[i].Stabilize();
 	}
-	QStatus status = Signal(NULL, *mSessionId, *(mIntf->GetMember(intfName.c_str())), msg.data(), size, 0, flags);
+	QStatus status = Signal(NULL, *mSessionId, *(mIntf->GetMember(intfName.c_str())), msg, size, 0, flags);
 	for (int i = 0; i < size; i++)
 	{
 		delete msgs[i];
 	}
+	delete[] msg;
 	return status;
 }
 
 const Message * NativeBusObject::CallMethod(std::string member, MsgArg * msgs[], int size)
 {
 	QStatus status = ER_OK;
+	Message * copiedReply = NULL;
 	if (mProxy)
 	{
-		std::vector<MsgArg> msg(size);
+		MsgArg * msg = new MsgArg[size];
 		for (int i = 0; i < size; i++)
 		{
-			msg.at(i) = *msgs[i];
+			msg[i] = *msgs[i];
 		}
 		ajn::Message reply(mBus);
-		if ((status = mProxy->MethodCall(*(mIntf->GetMember(member.c_str())), msg.data(), size, reply, 400)) == ER_OK)
-		{
-			for (int i = 0; i < size; i++)
-			{
-				delete msgs[i];
-			}
-			Message * copiedReply = new Message(reply);
-			return copiedReply;
+		if ((status = mProxy->MethodCall(*(mIntf->GetMember(member.c_str())), msg, size, reply, 400)) == ER_OK)
+		{		
+			copiedReply = new Message(reply);
 		}
+		delete[] msg;
+
 	}
 	printf("else : Status of methodcall = %s\n", QCC_StatusText(status));
-
-	return nullptr;
+	for (int i = 0; i < size; i++)
+	{
+		delete msgs[i];
+	}
+	return copiedReply;
 }
 
 void NativeBusObject::SetMethodCall(MethodCall func)
@@ -72,7 +74,7 @@ void NativeBusObject::SetEventCall(SignalEvent func)
 QStatus NativeBusObject::RegisterMethodHandler(std::string intfName)
 {
 	if (mIntf->GetMember(intfName.c_str()) == NULL)
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 	return AddMethodHandler(mIntf->GetMember(intfName.c_str()),
 		static_cast<MessageReceiver::MethodHandler>(&NativeBusObject::MethodHandler));
 }
@@ -80,7 +82,7 @@ QStatus NativeBusObject::RegisterMethodHandler(std::string intfName)
 QStatus NativeBusObject::RegisterEventHandler(std::string intfName)
 {
 	if (mIntf->GetMember(intfName.c_str()) == NULL)
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 
 	return mBus.RegisterSignalHandler(this,
 		static_cast<MessageReceiver::SignalHandler>(&NativeBusObject::SignalHandler),

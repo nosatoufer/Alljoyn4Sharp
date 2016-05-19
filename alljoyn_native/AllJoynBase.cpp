@@ -1,4 +1,5 @@
 #include "AllJoynBase.h"
+#include "alljoyn\AuthListener.h"
 
 //static volatile sig_atomic_t s_interrupt = false;
 //

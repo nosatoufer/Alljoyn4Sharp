@@ -28,9 +28,9 @@ Server::~Server()
 QStatus Server::CreateBusObject(void)
 {
 	if (mBusObject = new NativeBusObject(*mBus, mAdvertisedName, CHAT_SERVICE_OBJECT_PATH, &mSessionId, CHAT_SERVICE_INTERFACE_NAME))
-		return QStatus::ER_OK;
+		return ER_OK;
 	else
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 }
 
 QStatus Server::RegisterBusObject(void)
@@ -116,7 +116,7 @@ QStatus Server::RegisterMethodHandler(const char * intfName)
 	if (mBusObject)
 		return mBusObject->RegisterMethodHandler(intfName);
 	else
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 
 }
 
@@ -125,7 +125,7 @@ QStatus Server::RegisterSignalHandler(const char * intfName)
 	if (mBusObject)
 		return mBusObject->RegisterEventHandler(intfName);
 	else
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 }
 
 void Server::setSessionId(SessionId id)

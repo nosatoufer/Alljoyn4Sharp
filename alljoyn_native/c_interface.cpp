@@ -1,6 +1,10 @@
 #include "Client.h"
 #include "Server.h"
 
+#ifdef WIN32
+#define EXPORT __declspec(dllexport) 
+#endif
+
 extern "C"
 {
 	struct  NativeServer
@@ -18,29 +22,28 @@ extern "C"
 		MsgArg * msg;
 	};
 
-	void NativeSignal_Destroy(NativeSignal & signal);
 
 #pragma region Server
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Server_Initialize(NativeServer server)
 	{
 		return server.engine->Initialize();
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Server_Start(NativeServer server)
 	{
 		return server.engine->Start();
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Server_Stop(NativeServer server)
 	{
 		return server.engine->Stop();
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		NativeServer __stdcall Server_Create(const char* prefix, const char* name)
 	{
 		NativeServer server;
@@ -48,20 +51,20 @@ extern "C"
 		return server;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_Destroy(NativeServer server)
 	{
 		delete server.engine;
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		bool __stdcall Server_RegisterCallbacks(NativeServer server,
 			CreateInterfaceCallback handle) {
 		server.engine->RegisterCreateInterface(handle);
 		return true;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		bool __stdcall Server_AddInterfaceMember(
 			NativeServer server,
 			const char* name,
@@ -73,7 +76,7 @@ extern "C"
 		return server.engine->AddInterfaceMember(name, inputSig, outSig, argNames, memberType);
 	}
 	/* OLD
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Server_SendSignal(
 			NativeServer server, NativeSignal signal) {
 		int ret = server.engine->Send(signal);
@@ -90,37 +93,37 @@ extern "C"
 	 * DEPRECATED ?
 	 */
 	/*
-	__declspec(dllexport)
+	EXPORT 
 		bool __stdcall Server_RegisterTypeCallbacks(NativeServer server, SendStringArg arg) {
 		return server.engine->RegisterCallback<SendStringArg>(arg, AllJoynTypeId::ALLJOYN_STRING);
 	};
 	*/
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_SetMethodHandler(NativeServer server, MethodCall func)
 	{
 		server.engine->SetMethodCall(func);
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_SetSignalHandler(NativeServer server, SignalEvent func)
 	{
 		server.engine->SetSignalCall(func);
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_RegisterMethodHandler(NativeServer server, const char * intfName)
 	{
 		QStatus st = server.engine->RegisterMethodHandler(intfName);
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_RegisterSignalHandler(NativeServer server, const char * intfName)
 	{
 		QStatus st = server.engine->RegisterSignalHandler(intfName);
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Server_SendSignal(NativeServer server, const char * intfName, MsgArg** msg, int numArgs)
 	{
 		server.engine->SendSignal(intfName, msg, numArgs);
@@ -129,27 +132,27 @@ extern "C"
 
 #pragma region Client
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Client_Start(NativeClient client)
 	{
 		return client.engine->Start();
 
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Client_Initialize(NativeClient client)
 	{
 		return client.engine->Initialize();
 
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall Client_Stop(NativeClient client)
 	{
 		return client.engine->Stop();
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		NativeClient __stdcall Client_Create(const char * prefix, const char * name)
 	{
 		NativeClient client;
@@ -157,14 +160,14 @@ extern "C"
 		return client;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Client_Destroy(NativeClient client)
 	{
 		delete client.engine;
 
 	};
 
-	__declspec(dllexport)
+	EXPORT 
 		bool __stdcall Client_AddInterfaceMember(
 			NativeClient client,
 			const char* name,
@@ -177,7 +180,7 @@ extern "C"
 	}
 
 	
-	__declspec(dllexport)
+	EXPORT 
 		bool __stdcall Client_RegisterCreateInterface(NativeClient client,
 			CreateInterfaceCallback handle) {
 		client.engine->RegisterCreateInterface(handle);
@@ -185,20 +188,20 @@ extern "C"
 	}
 	
 
-	__declspec(dllexport)
+	EXPORT 
 		const Message* __stdcall Client_CallMethod(NativeClient client, const char * member, MsgArg** msgs, int size)
 	{
 		return client.engine->CallMethod(member, msgs, size);
 
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Client_SetSignalHandler(NativeClient client, SignalEvent func)
 	{
 		client.engine->SetSignalCall(func);
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		void __stdcall Client_RegisterSignalHandler(NativeClient client, const char * intfName)
 	{
 		QStatus st = client.engine->RegisterSignalHandler(intfName);
@@ -212,59 +215,59 @@ extern "C"
 #pragma region Alljoyn Wrapper
 
 	/// AllJoyn wrapper for MsgArg and Message
-	__declspec(dllexport)
+	EXPORT 
 		const MsgArg* __stdcall MessageGetArg(Message * message, int index)
 	{
 		return (*message)->GetArg(index);
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MessageGetSignature(Message * msg, char * buff)
 	{
 		const char * ret = (*msg)->GetSignature();
 		if (strlen(ret) != 0)
 		{
-			strcpy_s(buff, 1024, ret);
+			strncpy(buff, ret, 1024);
 			return strlen(buff) + 1;
 		}
 		return 0;
 	}
 #pragma region MsgArgConstructors
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgShort(short val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("n", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgInt(int val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("i", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgLong(long val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("x", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgShortUInt(uint16_t val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("q", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgUInt(uint32_t val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("u", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgLongUInt(uint64_t val)
 	{
 		NativeMsgArg nMsgArg;
@@ -272,21 +275,21 @@ extern "C"
 		return nMsgArg;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		NativeMsgArg __stdcall CreateMsgArgDouble(double val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("d", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		NativeMsgArg __stdcall CreateMsgArgBool(bool val)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("b", val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		NativeMsgArg __stdcall CreateMsgArgString(const char * val)
 	{
 		NativeMsgArg nMsgArg;
@@ -295,56 +298,56 @@ extern "C"
 		return nMsgArg;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgShortArray(short* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("an", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgIntArray(int* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ai", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgLongArray(long long* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ax", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgShortUIntArray(uint16_t* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("aq", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgUIntArray(uint32_t* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("au", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgLongUIntArray(uint64_t* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("at", numArgs, val);
 		return nMsgArg;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgDoubleArray(double* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
 		nMsgArg.msg = new MsgArg("ad", numArgs, val);
 		return nMsgArg;
 	}	
-	__declspec(dllexport)
+	EXPORT 
 		const NativeMsgArg __stdcall CreateMsgArgBoolArray(bool* val, int numArgs)
 	{
 		NativeMsgArg nMsgArg;
@@ -355,52 +358,52 @@ extern "C"
 
 #pragma region MsgArgGetters
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetStringPtr(const MsgArg* msg, char *buff)
 	{
 		const char * c = msg->v_string.str;
-		strncpy_s(buff, 1024, c, strlen(c) + 1);
+		strncpy(buff, c, 1024);
 		return strlen(buff) + 1;
 
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetShort(MsgArg* mess)
 	{
 		return mess->v_int16;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetInt(MsgArg* mess)
 	{
 		return mess->v_int32;
 	}	
-	__declspec(dllexport)
+	EXPORT 
 		long long __stdcall MsgArgGetLong(MsgArg* mess)
 	{
 		return mess->v_int64;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetShortUInt(MsgArg* mess)
 	{
 		return mess->v_uint16;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetUInt(MsgArg* mess)
 	{
 		return mess->v_uint32;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		long long __stdcall MsgArgGetLongUInt(MsgArg* mess)
 	{
 		return mess->v_uint64;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		double __stdcall MsgArgGetDouble(MsgArg* msg)
 	{
 		double val;
 		msg->Get("d", &val);
 		return val;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetBool(MsgArg* msg)
 	{
 		bool val;
@@ -408,7 +411,7 @@ extern "C"
 		return val;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetNumArguments(MsgArg* msg, const char * type)
 	{
 		size_t numArg = 0;
@@ -417,7 +420,7 @@ extern "C"
 		return numArg;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetDoubleArray(MsgArg* msg, double * values)
 	{
 		double* msgValues;
@@ -429,7 +432,7 @@ extern "C"
 		}
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetShortArray(MsgArg* msg, short * values)
 	{
 		short* msgValues;
@@ -439,7 +442,7 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetIntArray(MsgArg* msg, int * values)
 	{
 		int* msgValues;
@@ -450,7 +453,7 @@ extern "C"
 		return (int)s;
 	}
 
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetLongArray(MsgArg* msg, long long* values)
 	{
 		long long* msgValues;
@@ -460,7 +463,7 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetShortUIntArray(MsgArg* msg, uint16_t * values)
 	{
 		uint16_t* msgValues;
@@ -470,7 +473,7 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetUIntArray(MsgArg* msg, uint32_t * values)
 	{
 		uint32_t* msgValues;
@@ -480,7 +483,7 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetLongUIntArray(MsgArg* msg, uint64_t * values)
 	{
 		uint64_t* msgValues;
@@ -490,7 +493,7 @@ extern "C"
 			values[i] = msgValues[i];
 		return (int)s;
 	}
-	__declspec(dllexport)
+	EXPORT 
 		int __stdcall MsgArgGetBoolArray(MsgArg* msg, bool * values)
 	{
 		bool* msgValues;

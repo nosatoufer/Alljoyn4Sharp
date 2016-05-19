@@ -15,6 +15,10 @@
 #include <string>
 #include <map>
 
+#ifndef WIN32
+#define __stdcall
+#endif
+
 /* constants. */
 static const char* CHAT_SERVICE_INTERFACE_NAME = "org.alljoyn.bus.samples.chat";
 static const char* CHAT_SERVICE_OBJECT_PATH = "/chatService";
@@ -33,13 +37,14 @@ typedef void(__stdcall * SignalEvent)(const char * member, void* msg);
 
 using namespace ajn;
 
+/* OLD 
 struct  NativeSignal
 {
 	int numargs;
 	MsgArg * args;
 	void ** data;
 };
-
+*/
 struct Connection {
 	SessionId session;
 };

@@ -56,9 +56,9 @@ void Client::RegisterBusListener()
 QStatus Client::CreateBusObject()
 {
 	if (mBusObject = new NativeBusObject(*mBus, mAdvertisedName, CHAT_SERVICE_OBJECT_PATH, &mSessionId, CHAT_SERVICE_INTERFACE_NAME))
-		return QStatus::ER_OK;
+		return ER_OK;
 	else
-		return QStatus::ER_FAIL;
+		return ER_FAIL;
 }
 
 /** Begin discovery on the well-known name of the service to be called, report the result to
@@ -66,7 +66,7 @@ stdout, and return the result status. */
 QStatus Client::FindAdvertisedName(void)
 {
 	/* Begin discovery on the well-known name of the service to be called */
-	QStatus status = mBus->FindAdvertisedName(mAdvertisedName.c_str()); // 1
+	QStatus status = mBus->FindAdvertisedName(mAdvertisedName.c_str()); //1 
 
 	if (status == ER_OK) {
 		printf("org.alljoyn.Bus.FindAdvertisedName ('%s') succeeded.\n", mAdvertisedName.c_str());

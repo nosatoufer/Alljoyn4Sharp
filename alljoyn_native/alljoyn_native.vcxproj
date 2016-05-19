@@ -21,6 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{524C501C-B33E-4CA2-9C7B-E492DAF4623B}</ProjectGuid>
     <RootNamespace>alljoyn_native</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,7 +73,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ALLJOYN_SDK_INC);$(ALLJOYN_SDK_COMMON)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>QCC_OS_GROUP_WINDOWS;ROUTER;UNICODE;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>QCC_OS_GROUP_WINDOWS;ROUTER;UNICODE;_WINDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
